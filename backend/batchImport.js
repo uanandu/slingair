@@ -8,21 +8,24 @@ const options = {
   useUnifiedTopology: true,
 };
 
-const {flights, reservations} = require("./data");
+const { flights, reservations } = require("./data");
 
 const batchImport = async () => {
+  let flightsList = {
+    _id: Object.keys(flights).toString(),
+    flight: Object.keys(flights).toString(),
+    seats: Object.values(flights.SA231),
+  };
 
-    let flightsList = [];
-    
-    flightsList.push(
-      {
-        _id: Object.keys(flights).toString(),
-        flight: Object.keys(flights).toString(),
-        seats: Object.values(flights.SA231),
-      }
-    );
-    
-    // console.log(flightsList)
+  // flightsList.push(
+  //   {
+  //     _id: Object.keys(flights).toString(),
+  //     flight: Object.keys(flights).toString(),
+  //     seats: Object.values(flights.SA231),
+  //   }
+  // );
+
+  // console.log(flightsList)
 
   try {
     const client = new MongoClient(MONGO_URI, options);
@@ -32,13 +35,13 @@ const batchImport = async () => {
     console.log("Connected to MongoDB");
 
     const db = client.db("slingair"); // declare the database
-    
-    const result = await db.collection("flightsList").insertOne(flightsList); // insert the flight info into the database as a new collection
 
-    // const result2 = await db.collection("flightsList").insertMany(Object.values(reservations)); // insert the reservation info into the database as a new collection
+    // const result = await db.collection("flights").insertOne(flightsList); // insert the flight info into the database as a new collection
+
+    const result2 = await db.collection("reservations").insertMany(reservations); // insert the reservation info into the database as a new collection
 
     // console.log("result here", result);
-    
+
     client.close();
   } catch (error) {
     console.log(error.stack, "error");
