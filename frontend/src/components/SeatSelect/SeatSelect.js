@@ -1,5 +1,7 @@
 import styled from "styled-components";
 
+import Plane from "./Plane";
+
 const SeatSelect = ({}) => {
   return (
     <Wrapper>
@@ -13,7 +15,7 @@ const SeatSelect = ({}) => {
       <SeatWrapper>
         <SeatInfo>Select your seat and Provide your information!</SeatInfo>
         <SeatDiv>
-          <SeatSection>This is where the seats will be displayed</SeatSection>
+          <Plane />
           <SeatForm>
             <InputFirstName placeholder="First Name" />
             <InputLastName placeholder="Last Name" />
