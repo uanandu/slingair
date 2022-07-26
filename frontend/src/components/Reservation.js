@@ -1,4 +1,4 @@
-export const ViewReservation = () => {
+export const Reservation = () => {
   return (
     <div>
       <h1>View Reservation</h1>

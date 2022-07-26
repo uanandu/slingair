@@ -6,6 +6,7 @@ import SeatSelect from "./SeatSelect";
 import Confirmation from "./Confirmation";
 import { ErrorPage } from "./ErrorPage";
 import GlobalStyles from "./GlobalStyles";
+import { Reservation } from "./Reservation";
 
 const App = () => {
   return (
@@ -20,7 +21,9 @@ const App = () => {
           <Route exact path="/confirmed">
             <Confirmation />
           </Route>
-          <Route path="/view-reservation">Reservation shown here if any</Route>
+          <Route path="/reservation">
+            <Reservation />
+          </Route>
           <Route path="*">
             <ErrorPage />
           </Route>

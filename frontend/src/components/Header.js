@@ -11,7 +11,7 @@ const Header = () => (
     <Nav>
       {/* TODO: only show link if the user has a reservation already */}
       <>
-        <StyledNavLink to="/view-reservation">Reservation</StyledNavLink>
+        <StyledNavLink to="/reservation">Reservation</StyledNavLink>
       </>
     </Nav>
   </Wrapper>
