@@ -20,13 +20,19 @@ const options = {
 const getFlights = async (req, res) => {
   try {
     const client = new MongoClient(MONGO_URI, options);
+
     console.log("Connecting to MongoDB...");
+
     await client.connect();
     const db = client.db("slingair");
     const result = await db.collection("flights").find().toArray();
+
     // console.log("get flights results..",result);
+
     res.status(200).json({ status: 200, flight_list: result });
+
     client.close();
+
   } catch (err) {
     res.status(500).json({ status: 500, message: err.message });
   }
@@ -34,19 +40,30 @@ const getFlights = async (req, res) => {
 
 // returns all the seats on a specified flight
 const getFlight = async (req, res) => {
+
   // console.log(req.params);
+
   const flightNumber = req.params.flight;
+
   try {
+
     const client = new MongoClient(MONGO_URI, options);
+
     console.log("Connecting to MongoDB...");
+
     await client.connect();
+
     const db = client.db("slingair");
+
     const result = await db
       .collection("flights")
       .findOne({ flight: flightNumber });
     // console.log("get flight info with number",result);
+
     res.status(200).json({ status: 200, flight_seats: result.seats });
+
     client.close();
+
   } catch (err) {
     res.status(500).json({ status: 500, message: err.message });
   }
@@ -54,15 +71,24 @@ const getFlight = async (req, res) => {
 
 // returns all reservations
 const getReservations = async (req, res) => {
+
   try {
+
     const client = new MongoClient(MONGO_URI, options);
+
     console.log("Connecting to MongoDB...");
+
     await client.connect();
     const db = client.db("slingair");
+
     const result = await db.collection("reservations").find().toArray();
+
     // console.log("get reservations results..",result);
+
     res.status(200).json({ status: 200, reservation_list: result });
+
     client.close();
+
   } catch (err) {
     res.status(500).json({ status: 500, message: err.message });
   }
@@ -70,19 +96,31 @@ const getReservations = async (req, res) => {
 
 // returns a single reservation
 const getSingleReservation = async (req, res) => {
+
   // console.log("get single reservation", req.params);
+
   const { reservationId } = req.params.reservation;
+
   try {
+
     const client = new MongoClient(MONGO_URI, options);
+
     console.log("Connecting to MongoDB...");
+
     await client.connect();
+
     const db = client.db("slingair");
+
     const result = await db
       .collection("reservations")
       .findOne({ reservationId });
+
     // console.log("get single reservation result..",result);
+
     res.status(200).json({ status: 200, reservation: result });
+
     client.close();
+
   } catch (err) {
     res.status(500).json({ status: 500, message: err.message });
   }
@@ -90,7 +128,9 @@ const getSingleReservation = async (req, res) => {
 
 // creates a new reservation
 const addReservation = async (req, res) => {
+
   //   console.log("add reservation", req.body);
+  
   const { flight, givenName, surName, email, seat } = req.body;
 
   // validation of data
