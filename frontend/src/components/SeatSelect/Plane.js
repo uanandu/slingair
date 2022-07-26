@@ -1,22 +1,23 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 
-const Plane = ({}) => {
-  const [seating, setSeating] = useState([]);
-
-  useEffect(() => {
-    // TODO: get seating data for selected flight
-  }, []);
-
+const Plane = ({ seats, formData, handleChange, handleSeatSelect }) => {
   return (
     <Wrapper>
-      {seating && seating.length > 0 ? (
-        seating.map((seat) => (
+      {seats && seats.length > 0 ? (
+        seats.map((seat) => (
           <SeatWrapper key={`seat-${seat.id}`}>
             <label>
               {seat.isAvailable ? (
                 <>
-                  <Seat type="radio" name="seat" onChange={() => {}} />
+                  <Seat
+                    type="radio"
+                    name="seat"
+                    onChange={(e) => {
+                      handleChange(e);
+                      handleSeatSelect(seat.id);
+                    }}
+                  />
                   <Available>{seat.id}</Available>
                 </>
               ) : (

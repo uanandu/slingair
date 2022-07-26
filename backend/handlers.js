@@ -6,7 +6,7 @@ const { v4: uuidv4 } = require("uuid");
 // use this data. Changes will persist until the server (backend) restarts.
 // const { flights, reservations } = require("./data");
 
-const { MongoClient } = require("mongodb");
+const { MongoClient, ObjectId } = require("mongodb");
 
 require("dotenv").config();
 const { MONGO_URI } = process.env;
@@ -95,7 +95,8 @@ const getReservations = async (req, res) => {
 const getSingleReservation = async (req, res) => {
   // console.log("get single reservation", req.params);
 
-  const { reservationId } = req.params.reservation;
+  const reservationId= req.params.reservation;
+  console.log("get single reservation",typeof(reservationId));
 
   try {
     const client = new MongoClient(MONGO_URI, options);
@@ -108,7 +109,7 @@ const getSingleReservation = async (req, res) => {
 
     const result = await db
       .collection("reservations")
-      .findOne({ reservationId });
+      .findOne({"_id":ObjectId(reservationId)});
 
     // console.log("get single reservation result..",result);
 
@@ -222,16 +223,14 @@ const updateReservation = async (req, res) => {
 // deletes a specified reservation
 // from: /api/delete-reservation/:reservation
 const deleteReservation = async (req, res) => {
-  const { reservationId } = req.params.reservation;
+  const reservationId = req.params.reservation;
 
   try {
     const client = new MongoClient(MONGO_URI, options);
     console.log("Connecting to MongoDB...");
     await client.connect();
     const db = client.db("slingair");
-    const result = await db.collection("reservations").deleteOne({
-      reservationId,
-    });
+    const result = await db.collection("reservations").deleteOne({"_id":ObjectId(reservationId)});
     // console.log("delete reservation result..",result);
     res.status(200).json({
       status: 200,
