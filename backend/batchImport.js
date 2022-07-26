@@ -17,14 +17,6 @@ const batchImport = async () => {
     seats: Object.values(flights.SA231),
   };
 
-  // flightsList.push(
-  //   {
-  //     _id: Object.keys(flights).toString(),
-  //     flight: Object.keys(flights).toString(),
-  //     seats: Object.values(flights.SA231),
-  //   }
-  // );
-
   // console.log(flightsList)
 
   try {

@@ -4,35 +4,211 @@
 const { v4: uuidv4 } = require("uuid");
 
 // use this data. Changes will persist until the server (backend) restarts.
-const { flights, reservations } = require("./data");
+// const { flights, reservations } = require("./data");
+
+const { MongoClient } = require("mongodb");
+
+require("dotenv").config();
+const { MONGO_URI } = process.env;
+
+const options = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+};
 
 // returns a list of all flights
-const getFlights = (req, res) => {};
+const getFlights = async (req, res) => {
+  try {
+    const client = new MongoClient(MONGO_URI, options);
+    console.log("Connecting to MongoDB...");
+    await client.connect();
+    const db = client.db("slingair");
+    const result = await db.collection("flights").find().toArray();
+    // console.log("get flights results..",result);
+    res.status(200).json({ status: 200, flight_list: result });
+    client.close();
+  } catch (err) {
+    res.status(500).json({ status: 500, message: err.message });
+  }
+};
 
 // returns all the seats on a specified flight
-const getFlight = (req, res) => {};
+const getFlight = async (req, res) => {
+  // console.log(req.params);
+  const flightNumber = req.params.flight;
+  try {
+    const client = new MongoClient(MONGO_URI, options);
+    console.log("Connecting to MongoDB...");
+    await client.connect();
+    const db = client.db("slingair");
+    const result = await db
+      .collection("flights")
+      .findOne({ flight: flightNumber });
+    // console.log("get flight info with number",result);
+    res.status(200).json({ status: 200, flight_seats: result.seats });
+    client.close();
+  } catch (err) {
+    res.status(500).json({ status: 500, message: err.message });
+  }
+};
 
 // returns all reservations
-const getReservations = (req, res) => {};
+const getReservations = async (req, res) => {
+  try {
+    const client = new MongoClient(MONGO_URI, options);
+    console.log("Connecting to MongoDB...");
+    await client.connect();
+    const db = client.db("slingair");
+    const result = await db.collection("reservations").find().toArray();
+    // console.log("get reservations results..",result);
+    res.status(200).json({ status: 200, reservation_list: result });
+    client.close();
+  } catch (err) {
+    res.status(500).json({ status: 500, message: err.message });
+  }
+};
 
 // returns a single reservation
-const getSingleReservation = (req, res) => {};
+const getSingleReservation = async (req, res) => {
+  // console.log("get single reservation", req.params);
+  const { reservationId } = req.params.reservation;
+  try {
+    const client = new MongoClient(MONGO_URI, options);
+    console.log("Connecting to MongoDB...");
+    await client.connect();
+    const db = client.db("slingair");
+    const result = await db
+      .collection("reservations")
+      .findOne({ reservationId });
+    // console.log("get single reservation result..",result);
+    res.status(200).json({ status: 200, reservation: result });
+    client.close();
+  } catch (err) {
+    res.status(500).json({ status: 500, message: err.message });
+  }
+};
 
 // creates a new reservation
-const addReservation = (req, res) => {};
+const addReservation = async (req, res) => {
+  //   console.log("add reservation", req.body);
+  const { flight, givenName, surName, email, seat } = req.body;
+
+  // validation of data
+  if (!flight || !givenName || !surName || !email || !seat) {
+    res.status(400).json({ status: 400, message: "Missing required fields" });
+    return;
+  } // email validation
+  else if (
+    !/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(
+      email
+    )
+  ) {
+    res.status(400).json({ status: 400, message: "Invalid email address" });
+    return;
+  } // if validation passes, create a new reservation
+  else {
+    try {
+      const client = new MongoClient(MONGO_URI, options);
+      console.log("Connecting to MongoDB...");
+      await client.connect();
+      const db = client.db("slingair");
+      const result = await db.collection("reservations").insertOne({
+        id: uuidv4(),
+        flight: flight,
+        seat: seat,
+        givenName: givenName,
+        surName: surName,
+        email: email,
+      });
+      // console.log("add reservation result..",result);
+      res.status(201).json({
+        status: 201,
+        message: "Reservation successful!",
+        reservation: result,
+        your_reservation_id: result.insertedId,
+      });
+      client.close();
+    } catch (err) {
+      res.status(500).json({ status: 500, message: err.message });
+    }
+  }
+};
 
 // updates an existing reservation
-const updateReservation = (req, res) => {};
+const updateReservation = async (req, res) => {
+  const { reservationId } = req.params.reservation;
+  const { flight, givenName, surName, email, seat } = req.body;
+
+  // validation of data
+  if (!flight || !givenName || !surName || !email || !seat) {
+    res.status(400).json({ status: 400, message: "Missing required fields" });
+    return;
+  } // email validation
+  else if (
+    !/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(
+      email
+    )
+  ) {
+    res.status(400).json({ status: 400, message: "Invalid email address" });
+    return;
+  } // if validation passes, update a reservation
+  else {
+    try {
+      const client = new MongoClient(MONGO_URI, options);
+      console.log("Connecting to MongoDB...");
+      await client.connect();
+      const db = client.db("slingair");
+      const result = await db.collection("reservations").updateOne(
+        { reservationId },
+        {
+          $set: {
+            flight: flight,
+            seat: seat,
+            givenName: givenName,
+            surName: surName,
+            email: email,
+          },
+        }
+      );
+      // console.log("update reservation result..",result);
+      res.status(200).json({ status: 200, message: "Reservation updated!", reservation_id: reservationId });
+      client.close();
+    } catch (err) {
+      res.status(500).json({ status: 500, message: err.message });
+    }
+  }
+};
 
 // deletes a specified reservation
-const deleteReservation = (req, res) => {};
+const deleteReservation = async (req, res) => {
+  const { reservationId } = req.params.reservation;
+
+  try {
+    const client = new MongoClient(MONGO_URI, options);
+    console.log("Connecting to MongoDB...");
+    await client.connect();
+    const db = client.db("slingair");
+    const result = await db.collection("reservations").deleteOne({
+      reservationId,
+    });
+    // console.log("delete reservation result..",result);
+    res.status(200).json({
+      status: 200,
+      message: "Reservation deleted!",
+      reservation: result,
+    });
+    client.close();
+  } catch (err) {
+    res.status(500).json({ status: 500, message: err.message });
+  }
+};
 
 module.exports = {
-    getFlights,
-    getFlight,
-    getReservations,
-    addReservation,
-    getSingleReservation,
-    deleteReservation,
-    updateReservation,
+  getFlights,
+  getFlight,
+  getReservations,
+  addReservation,
+  getSingleReservation,
+  deleteReservation,
+  updateReservation,
 };
