@@ -17,6 +17,7 @@ const options = {
 };
 
 // returns a list of all flights
+// from: /api/get-flights
 const getFlights = async (req, res) => {
   try {
     const client = new MongoClient(MONGO_URI, options);
@@ -32,21 +33,19 @@ const getFlights = async (req, res) => {
     res.status(200).json({ status: 200, flight_list: result });
 
     client.close();
-
   } catch (err) {
     res.status(500).json({ status: 500, message: err.message });
   }
 };
 
 // returns all the seats on a specified flight
+// from: /api/get-flight/:flight
 const getFlight = async (req, res) => {
-
   // console.log(req.params);
 
   const flightNumber = req.params.flight;
 
   try {
-
     const client = new MongoClient(MONGO_URI, options);
 
     console.log("Connecting to MongoDB...");
@@ -63,17 +62,15 @@ const getFlight = async (req, res) => {
     res.status(200).json({ status: 200, flight_seats: result.seats });
 
     client.close();
-
   } catch (err) {
     res.status(500).json({ status: 500, message: err.message });
   }
 };
 
 // returns all reservations
+// from: /api/get-reservations
 const getReservations = async (req, res) => {
-
   try {
-
     const client = new MongoClient(MONGO_URI, options);
 
     console.log("Connecting to MongoDB...");
@@ -88,21 +85,19 @@ const getReservations = async (req, res) => {
     res.status(200).json({ status: 200, reservation_list: result });
 
     client.close();
-
   } catch (err) {
     res.status(500).json({ status: 500, message: err.message });
   }
 };
 
 // returns a single reservation
+// from: /api/get-reservation/:reservation
 const getSingleReservation = async (req, res) => {
-
   // console.log("get single reservation", req.params);
 
   const { reservationId } = req.params.reservation;
 
   try {
-
     const client = new MongoClient(MONGO_URI, options);
 
     console.log("Connecting to MongoDB...");
@@ -120,17 +115,16 @@ const getSingleReservation = async (req, res) => {
     res.status(200).json({ status: 200, reservation: result });
 
     client.close();
-
   } catch (err) {
     res.status(500).json({ status: 500, message: err.message });
   }
 };
 
 // creates a new reservation
+// from: /api/add-reservation
 const addReservation = async (req, res) => {
-
   //   console.log("add reservation", req.body);
-  
+
   const { flight, givenName, surName, email, seat } = req.body;
 
   // validation of data
@@ -175,12 +169,14 @@ const addReservation = async (req, res) => {
 };
 
 // updates an existing reservation
+// from: /api/update-reservation/
 const updateReservation = async (req, res) => {
-  const { reservationId } = req.params.reservation;
-  const { flight, givenName, surName, email, seat } = req.body;
+  // console.log("update reservation", req.body);
+
+  const { id, flight, givenName, surName, email, seat } = req.body;
 
   // validation of data
-  if (!flight || !givenName || !surName || !email || !seat) {
+  if (!id || !flight || !givenName || !surName || !email || !seat) {
     res.status(400).json({ status: 400, message: "Missing required fields" });
     return;
   } // email validation
@@ -191,7 +187,7 @@ const updateReservation = async (req, res) => {
   ) {
     res.status(400).json({ status: 400, message: "Invalid email address" });
     return;
-  } // if validation passes, update a reservation
+  } // if validation passes, update the reservation
   else {
     try {
       const client = new MongoClient(MONGO_URI, options);
@@ -199,7 +195,7 @@ const updateReservation = async (req, res) => {
       await client.connect();
       const db = client.db("slingair");
       const result = await db.collection("reservations").updateOne(
-        { reservationId },
+        { id },
         {
           $set: {
             flight: flight,
@@ -211,7 +207,11 @@ const updateReservation = async (req, res) => {
         }
       );
       // console.log("update reservation result..",result);
-      res.status(200).json({ status: 200, message: "Reservation updated!", reservation_id: reservationId });
+      res.status(200).json({
+        status: 200,
+        message: "Reservation updated successfully!",
+        reservation: result,
+      });
       client.close();
     } catch (err) {
       res.status(500).json({ status: 500, message: err.message });
@@ -220,6 +220,7 @@ const updateReservation = async (req, res) => {
 };
 
 // deletes a specified reservation
+// from: /api/delete-reservation/:reservation
 const deleteReservation = async (req, res) => {
   const { reservationId } = req.params.reservation;
 
