@@ -168,7 +168,7 @@ const addReservation = async (req, res) => {
       res.status(201).json({
         status: 201,
         message: "Reservation successful!",
-        reservation: result,
+        reservation: result, // i use this for reference
         your_reservation_id: result.insertedId,
       });
 
@@ -230,7 +230,7 @@ const updateReservation = async (req, res) => {
       res.status(200).json({
         status: 200,
         message: "Reservation updated successfully!",
-        reservation: result,
+        reservation: result,// i use this for reference
       });
       client.close();
     } catch (err) {
@@ -263,7 +263,7 @@ const deleteReservation = async (req, res) => {
     res.status(200).json({
       status: 200,
       message: "Reservation deleted!",
-      reservation: result,
+      reservation: result, // i use this for reference
     });
 
     client.close();
