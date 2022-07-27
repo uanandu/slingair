@@ -1,7 +1,9 @@
 import styled from "styled-components";
 import { NavLink } from "react-router-dom";
-
 import slingairLogo from "../assets/logo_text.png";
+
+
+let isBooked = localStorage.getItem("reserved");
 
 const Header = () => (
   <Wrapper>
@@ -10,9 +12,10 @@ const Header = () => (
     </Logo>
     <Nav>
       {/* TODO: only show link if the user has a reservation already */}
-      <>
+      {isBooked ? (
         <StyledNavLink to="/reservation">Reservation</StyledNavLink>
-      </>
+      ) : null}
+      <></>
     </Nav>
   </Wrapper>
 );

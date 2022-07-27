@@ -17,14 +17,13 @@ useEffect (() => {
   });
 }, []);
 
-  
 
   // console.log(reservation)
 
   return (
     <Wrapper>
       <Image src={tombstone} alt="tombstone" />
-
+      <h1>Your flight is confirmed!</h1>
       <ReservationInfo>
         <ReservedInfo id={reservedId}></ReservedInfo>
         <ReservedInfo><strong>Reservation #:</strong>{reservedId}</ReservedInfo>

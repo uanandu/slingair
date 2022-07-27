@@ -10,6 +10,7 @@ export const Form = ({ formData, disabled, handleChange, handleSubmit }) => {
           value={formData.givenName}
           name="givenName"
           onChange={(e)=>handleChange(e)}
+          autoFocus
         />
         <InputLastName
           type="text"

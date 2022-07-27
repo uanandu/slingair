@@ -95,8 +95,8 @@ const getReservations = async (req, res) => {
 const getSingleReservation = async (req, res) => {
   // console.log("get single reservation", req.params);
 
-  const reservationId= req.params.reservation;
-  console.log("get single reservation",typeof(reservationId));
+  const reservationId = req.params.reservation;
+  console.log("get single reservation", typeof reservationId);
 
   try {
     const client = new MongoClient(MONGO_URI, options);
@@ -109,7 +109,7 @@ const getSingleReservation = async (req, res) => {
 
     const result = await db
       .collection("reservations")
-      .findOne({"_id":ObjectId(reservationId)});
+      .findOne({ _id: ObjectId(reservationId) });
 
     // console.log("get single reservation result..",result);
 
@@ -155,13 +155,23 @@ const addReservation = async (req, res) => {
         surName: surName,
         email: email,
       });
+
       // console.log("add reservation result..",result);
+
+      const result2 = await db
+        .collection("flights")
+        .updateOne(
+          { _id: flight, "seats.id": seat },
+          { $set: { "seats.$.isAvailable": false } }
+        );
+
       res.status(201).json({
         status: 201,
         message: "Reservation successful!",
         reservation: result,
         your_reservation_id: result.insertedId,
       });
+
       client.close();
     } catch (err) {
       res.status(500).json({ status: 500, message: err.message });
@@ -196,7 +206,7 @@ const updateReservation = async (req, res) => {
       await client.connect();
       const db = client.db("slingair");
       const result = await db.collection("reservations").updateOne(
-        { id },
+        { _id: ObjectId(id) },
         {
           $set: {
             flight: flight,
@@ -207,7 +217,16 @@ const updateReservation = async (req, res) => {
           },
         }
       );
+
+      const result2 = await db
+        .collection("flights")
+        .updateOne(
+          { _id: flight, "seats.id": seat },
+          { $set: { "seats.$.isAvailable": false } }
+        );
+
       // console.log("update reservation result..",result);
+
       res.status(200).json({
         status: 200,
         message: "Reservation updated successfully!",
@@ -224,19 +243,29 @@ const updateReservation = async (req, res) => {
 // from: /api/delete-reservation/:reservation
 const deleteReservation = async (req, res) => {
   const reservationId = req.params.reservation;
+  const { flight, seat } = req.body;
 
   try {
     const client = new MongoClient(MONGO_URI, options);
     console.log("Connecting to MongoDB...");
     await client.connect();
     const db = client.db("slingair");
-    const result = await db.collection("reservations").deleteOne({"_id":ObjectId(reservationId)});
+    const result = await db
+      .collection("reservations")
+      .deleteOne({ _id: ObjectId(reservationId) });
     // console.log("delete reservation result..",result);
+    const result2 = await db
+      .collection("flights")
+      .findOneAndUpdate(
+        { _id: flight, "seats.id": seat },
+        { $set: { "seats.$.isAvailable": true } }
+      );
     res.status(200).json({
       status: 200,
       message: "Reservation deleted!",
       reservation: result,
     });
+
     client.close();
   } catch (err) {
     res.status(500).json({ status: 500, message: err.message });

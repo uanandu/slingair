@@ -3,12 +3,10 @@ import { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 
 import SeatSelect from "./SeatSelect";
-import Plane from "./Plane";
 
 import axios from "axios";
 import { FlightSelect } from "./FlightSelect";
 import { Form } from "./Form";
-import Confirmation from "../Confirmation";
 // here we get the data for seats from the backend
 
 export const HomePage = () => {
@@ -17,6 +15,7 @@ export const HomePage = () => {
   const [seating, setSeating] = useState([]);
   const [flight, setFlight] = useState("");
   const [selectedSeats, setSelectedSeats] = useState([]);
+  const [flightSelect, setFlightSelect] = useState("");
 
   const [formData, setFormData] = useState({
     seat: "",
@@ -27,16 +26,30 @@ export const HomePage = () => {
 
   const [disabled, setDisabled] = useState(true);
 
+  const handleFlightSelect = (flight) => {
+    // console.log("flight inside handleflight function", flight.target.value);
+    setFlightSelect(flight.target.value);
+  };
+
+  // console.log("here is the selected flight info", flightSelect);
+
   useEffect(() => {
     axios.get("api/get-flights").then((res) => {
-      // console.log("get flights results..",res.data.flight_list[0].flight);
+      console.log("get flights results..", res.data.flight_list);
       // console.log("the type of data", typeof(res.data.flight_list[0].flight))
-      setFlight(res.data.flight_list[0].flight);
-      setSeating(res.data.flight_list[0].seats);
-    });
-  }, []);
 
-  //   console.log("seating", seating);
+      const flightList = res.data.flight_list;
+      flightList.find((flight) => {
+        if (flight.flight === flightSelect) {
+          setSeating(flight.seats);
+        } else {
+          setSeating([]);
+        }
+      });
+    });
+  }, [flightSelect]);
+
+  // console.log("seating", seating);
   //   console.log("flight", flight);
 
   const handleSeatSelect = (seat) => {
@@ -50,9 +63,9 @@ export const HomePage = () => {
     });
   };
 
-  let data= {}
-  // console.log(formData);
-  // console.log(selectedSeats);
+  let data = {};
+  console.log("here is the form data", formData);
+  console.log("here is the selected seat", selectedSeats);
 
   // form submission
   const handleSubmit = (e) => {
@@ -62,7 +75,7 @@ export const HomePage = () => {
     // console.log("this is e from confirm button", e);
 
     data = {
-      flight: flight,
+      flight: flightSelect,
       seat: selectedSeats,
       givenName: e.target[0].value,
       surName: e.target[1].value,
@@ -71,17 +84,19 @@ export const HomePage = () => {
     // console.log("data", data);
 
     axios.post("/api/add-reservation", data).then((res) => {
-      console.log("response from the server", res);
+      // console.log("response from the server", res);
       if (res.status === 201) {
         localStorage.setItem("reservationId", res.data.your_reservation_id);
-      history.push("/confirmed");
+        localStorage.setItem("reserved", true);
       }
+      history.push("/confirmed");
+      window.location.reload()
     });
   };
 
   return (
     <MainWrapper>
-      <SeatSelect flight={flight} />
+      <SeatSelect handleFlightSelect={handleFlightSelect} />
       <SeatInfo>Select your seat and Provide your information!</SeatInfo>
       <Wrapper>
         <FlightSelect
