@@ -30,7 +30,7 @@ const getFlights = async (req, res) => {
 
     // console.log("get flights results..",result);
 
-    res.status(200).json({ status: 200, flight_list: result });
+    res.status(200).json({ status: 200, flight_list: result, message: "the requested data" });
 
     client.close();
   } catch (err) {
@@ -59,7 +59,7 @@ const getFlight = async (req, res) => {
       .findOne({ flight: flightNumber });
     // console.log("get flight info with number",result);
 
-    res.status(200).json({ status: 200, flight_seats: result.seats });
+    res.status(200).json({ status: 200, flight_seats: result.seats, message: "the requested data" });
 
     client.close();
   } catch (err) {
@@ -82,7 +82,7 @@ const getReservations = async (req, res) => {
 
     // console.log("get reservations results..",result);
 
-    res.status(200).json({ status: 200, reservation_list: result });
+    res.status(200).json({ status: 200, reservation_list: result, message: "the requested data" });
 
     client.close();
   } catch (err) {
@@ -113,7 +113,7 @@ const getSingleReservation = async (req, res) => {
 
     // console.log("get single reservation result..",result);
 
-    res.status(200).json({ status: 200, reservation: result });
+    res.status(200).json({ status: 200, reservation: result, message: "the requested data" });
 
     client.close();
   } catch (err) {
