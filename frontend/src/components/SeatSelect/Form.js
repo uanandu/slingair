@@ -1,6 +1,7 @@
 import styled from "styled-components";
 
 export const Form = ({ formData, disabled, handleChange, handleSubmit }) => {
+  console.log("disabled value inside form", disabled);
   return (
     <>
       <SeatForm onSubmit={handleSubmit}>
@@ -9,7 +10,7 @@ export const Form = ({ formData, disabled, handleChange, handleSubmit }) => {
           placeholder="First Name"
           value={formData.givenName}
           name="givenName"
-          onChange={(e)=>handleChange(e)}
+          onChange={(e) => handleChange(e)}
           autoFocus
         />
         <InputLastName
@@ -26,12 +27,7 @@ export const Form = ({ formData, disabled, handleChange, handleSubmit }) => {
           value={formData.email}
           onChange={handleChange}
         />
-        <ConfirmButton
-          type="submit"
-          disabled={disabled}
-        >
-          Confirm
-        </ConfirmButton>
+        <ConfirmButton type="submit" disabled={disabled} value="Confirm"/>
       </SeatForm>
     </>
   );
@@ -49,7 +45,10 @@ const SeatForm = styled.form`
 const InputFirstName = styled.input``;
 const InputLastName = styled.input``;
 const InputEmail = styled.input``;
-const ConfirmButton = styled.button`
+const ConfirmButton = styled.input`
   width: 285px;
   background: var(--color-cadmium-red);
+  :disabled {
+    background: var(--color-cadmium-red-light);
+  }
 `;

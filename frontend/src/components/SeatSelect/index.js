@@ -16,6 +16,7 @@ export const HomePage = () => {
   const [flight, setFlight] = useState("");
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [flightSelect, setFlightSelect] = useState("");
+  const [disabled, setDisabled] = useState(true);
 
   const [formData, setFormData] = useState({
     seat: "",
@@ -24,7 +25,6 @@ export const HomePage = () => {
     email: "",
   });
 
-  const [disabled, setDisabled] = useState(true);
 
   const handleFlightSelect = (flight) => {
     // console.log("flight inside handleflight function", flight.target.value);
@@ -54,6 +54,9 @@ export const HomePage = () => {
 
   const handleSeatSelect = (seat) => {
     setSelectedSeats(seat);
+    if(seat){
+      setDisabled(false);
+    }
   };
 
   const handleChange = (e) => {
@@ -111,7 +114,7 @@ export const HomePage = () => {
           formData={formData}
           handleChange={handleChange}
           handleSubmit={handleSubmit}
-          setDisabled={setDisabled}
+          disabled={disabled}
         />
       </Wrapper>
     </MainWrapper>
