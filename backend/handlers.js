@@ -247,12 +247,16 @@ const updateReservation = async (req, res) => {
           .collection("flights")
           .findOne({ _id: flight });
 
+        // console.log("flight information..", flightInformation);
+
         // check new seat availability
         const newSeatTest = flightInformation.seats.find(
-          (seat) => seat.id === seat && seat.isAvailable === true
+          (item) => item.id === seat
         );
 
-        if (newSeatTest) {
+        console.log("new seat test", newSeatTest);
+
+        if (!newSeatTest.isAvailable) {
           res
             .status(400)
             .json({ status: 400, message: "Seat is not available" });
