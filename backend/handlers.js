@@ -64,7 +64,7 @@ const getFlight = async (req, res) => {
 
     client.close();
   } catch (err) {
-    res.status(404).json({ status: 404, message: err.message });
+    res.status(500).json({ status: 500, message: err.message });
   }
 };
 
@@ -118,7 +118,7 @@ const getSingleReservation = async (req, res) => {
 
     client.close();
   } catch (err) {
-    res.status(404).json({ status: 404, message: err.message });
+    res.status(500).json({ status: 500, message: err.message });
   }
 };
 
