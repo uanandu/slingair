@@ -30,10 +30,15 @@ const getFlights = async (req, res) => {
 
     // console.log("get flights results..",result);
 
-    res.status(200).json({ status: 200, flight_list: result, message: "the requested flight list" });
+    res
+      .status(200)
+      .json({
+        status: 200,
+        flight_list: result,
+        message: "the requested flight list",
+      });
 
     client.close();
-
   } catch (err) {
     res.status(500).json({ status: 500, message: err.message });
   }
@@ -60,7 +65,13 @@ const getFlight = async (req, res) => {
       .findOne({ flight: flightNumber });
     // console.log("get flight info with number",result);
 
-    res.status(200).json({ status: 200, flight_seats: result.seats, message: "the requested seats" });
+    res
+      .status(200)
+      .json({
+        status: 200,
+        flight_seats: result.seats,
+        message: "the requested seats",
+      });
 
     client.close();
   } catch (err) {
@@ -83,7 +94,13 @@ const getReservations = async (req, res) => {
 
     // console.log("get reservations results..",result);
 
-    res.status(200).json({ status: 200, reservation_list: result, message: "the requested data" });
+    res
+      .status(200)
+      .json({
+        status: 200,
+        reservation_list: result,
+        message: "the requested data",
+      });
 
     client.close();
   } catch (err) {
@@ -114,7 +131,13 @@ const getSingleReservation = async (req, res) => {
 
     // console.log("get single reservation result..",result);
 
-    res.status(200).json({ status: 200, reservation: result, message: "the requested reservation data" });
+    res
+      .status(200)
+      .json({
+        status: 200,
+        reservation: result,
+        message: "the requested reservation data",
+      });
 
     client.close();
   } catch (err) {
@@ -184,11 +207,18 @@ const addReservation = async (req, res) => {
 // from: /api/update-reservation/
 const updateReservation = async (req, res) => {
   // console.log("update reservation", req.body);
+  // console.log("update reservation", req.params.reservation);
 
-  const { id, flight, givenName, surName, email, seat } = req.body;
+  const { flight, givenName, surName, email, seat } = req.body;
+
+  const reservationId = req.params.reservation;
+
+  const query = { _id: ObjectId(reservationId) };
+
+  console.log("query for reservation", query);
 
   // validation of data
-  if (!id || !flight || !givenName || !surName || !email || !seat) {
+  if (!flight || !givenName || !surName || !email || !seat) {
     res.status(400).json({ status: 400, message: "Missing required fields" });
     return;
   } // email validation
@@ -206,9 +236,49 @@ const updateReservation = async (req, res) => {
       console.log("Connecting to MongoDB...");
       await client.connect();
       const db = client.db("slingair");
-      const result = await db.collection("reservations").updateOne(
-        { _id: ObjectId(id) },
-        {
+
+      const selectedResult = await db.collection("reservations").findOne(query);
+
+      console.log("selected seat result..", selectedResult);
+
+      if (seat !== selectedResult.seat) {
+        const flight = selectedResult.flight;
+        const flightInformation = await db
+          .collection("flights")
+          .findOne({ _id: flight });
+
+        // check new seat availability
+        const newSeatTest = flightInformation.seats.find(
+          (seat) => seat.id === seat && seat.isAvailable === true
+        );
+
+        if (newSeatTest) {
+          res
+            .status(400)
+            .json({ status: 400, message: "Seat is not available" });
+          return;
+        } else {
+          const newSeat = await db
+            .collection("flights")
+            .updateOne(
+              { _id: flight, "seats.id": seat },
+              { $set: { "seats.$.isAvailable": false } }
+            );
+
+          const OldSeat = await db
+            .collection("flights")
+            .updateOne(
+              { _id: flight, "seats.id": selectedResult.seat },
+              { $set: { "seats.$.isAvailable": true } }
+            );
+        }
+      }
+
+      // update the collection
+
+      const finalResult = await db
+        .collection("reservations")
+        .updateOne(query, {
           $set: {
             flight: flight,
             seat: seat,
@@ -216,23 +286,16 @@ const updateReservation = async (req, res) => {
             surName: surName,
             email: email,
           },
-        }
-      );
-
-      const result2 = await db
-        .collection("flights")
-        .updateOne(
-          { _id: flight, "seats.id": seat },
-          { $set: { "seats.$.isAvailable": false } }
-        );
+        });
 
       // console.log("update reservation result..",result);
 
       res.status(200).json({
         status: 200,
         message: "Reservation updated successfully!",
-        reservation: result,// i use this for reference
+        reservation: finalResult, // i use this for reference
       });
+
       client.close();
     } catch (err) {
       res.status(500).json({ status: 500, message: err.message });
