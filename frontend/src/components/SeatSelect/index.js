@@ -70,6 +70,9 @@ export const HomePage = () => {
   console.log("here is the form data", formData);
   console.log("here is the selected seat", selectedSeats);
 
+  const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
   // form submission
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -87,13 +90,17 @@ export const HomePage = () => {
     // console.log("data", data);
 
     axios.post("/api/add-reservation", data).then((res) => {
-      // console.log("response from the server", res);
+      console.log("response from the server", res);
       if (res.status === 201) {
         localStorage.setItem("reservationId", res.data.your_reservation_id);
         localStorage.setItem("reserved", true);
       }
       history.push("/confirmed");
       window.location.reload()
+      if (res.status === 400) {
+        setError(true);
+        setErrorMessage(res.data.message);
+      }
     });
   };
 
@@ -101,6 +108,7 @@ export const HomePage = () => {
     <MainWrapper>
       <SeatSelect handleFlightSelect={handleFlightSelect} />
       <SeatInfo>Select your seat and Provide your information!</SeatInfo>
+      {error ? <h3>{errorMessage}</h3> : null}
       <Wrapper>
         <FlightSelect
           seats={seating}

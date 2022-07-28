@@ -12,6 +12,7 @@ export const Form = ({ formData, disabled, handleChange, handleSubmit }) => {
           name="givenName"
           onChange={(e) => handleChange(e)}
           autoFocus
+          required
         />
         <InputLastName
           type="text"
@@ -19,6 +20,7 @@ export const Form = ({ formData, disabled, handleChange, handleSubmit }) => {
           name="surname"
           value={formData.surname}
           onChange={handleChange}
+          required
         />
         <InputEmail
           type="email"
@@ -26,6 +28,7 @@ export const Form = ({ formData, disabled, handleChange, handleSubmit }) => {
           name="email"
           value={formData.email}
           onChange={handleChange}
+          required
         />
         <ConfirmButton type="submit" disabled={disabled} value="Confirm"/>
       </SeatForm>
