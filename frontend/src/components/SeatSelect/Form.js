@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const Form = ({ formData, disabled, handleChange, handleSubmit }) => {
-  console.log("disabled value inside form", disabled);
+  // console.log("disabled value inside form", disabled);
   return (
     <>
       <SeatForm onSubmit={handleSubmit}>
