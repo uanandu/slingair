@@ -344,28 +344,35 @@ const deleteReservation = async (req, res) => {
 
   const query = { _id: reservationId };
 
+  const findReservation = await db.collection("reservations").findOne(query);
 
+  if (findReservation) {
+    try {
 
-  try {
+      const updateFlightSeating = await db
+        .collection("flights")
+        .updateOne(
+          { _id: findReservation.flight, "seats.id": findReservation.seat },
+          { $set: { "seats.$.isAvailable": true } }
+        );
 
-    const findSeating = await db.collection("reservations").findOne(query);
+      const deleteReservedOne = await db
+        .collection("reservations")
+        .deleteOne(query);
 
-    const updateFlightSeating = await db.collection("flights").updateOne(
-      { _id: findSeating.flight, "seats.id": findSeating.seat },
-      { $set: { "seats.$.isAvailable": true } });
+      res.status(200).json({
+        status: 200,
+        message: "Reservation deleted successfully!",
+        reservation: deleteReservedOne,
+        flight: updateFlightSeating,
+      });
 
-    const deleteReservedOne = await db.collection("reservations").deleteOne(query);
-
-    res.status(200).json({
-      status: 200,
-      message: "Reservation deleted successfully!",
-      reservation: deleteReservedOne,
-      flight: updateFlightSeating,
-    });
-
-    client.close();
-  } catch (err) {
-    res.status(500).json({ status: 500, message: err.message });
+      client.close();
+    } catch (err) {
+      res.status(500).json({ status: 500, message: err.message });
+    }
+  } else {
+    res.status(404).json({ status: 404, message: "Reservation not found" });
   }
 };
 
