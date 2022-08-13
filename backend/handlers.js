@@ -184,7 +184,7 @@ const addReservation = async (req, res) => {
       .findOne({ _id: flight });
 
     seatAvailability.seats.forEach((seat) => {
-      if (seat.isAvailable && seat._id === req.body.seat) {
+      if (seat.isAvailable && seat.id === req.body.seat) {
         seat.isAvailable = false;
         availableSeat = true;
       }
@@ -240,7 +240,7 @@ const updateReservation = async (req, res) => {
 
   const reservationId = req.params.reservation;
 
-  const query = { _id: ObjectId(reservationId) };
+  const query = { _id: reservationId };
 
   console.log("query for reservation", query);
 
@@ -336,42 +336,36 @@ const updateReservation = async (req, res) => {
 // from: /api/delete-reservation/:reservation
 const deleteReservation = async (req, res) => {
   const reservationId = req.params.reservation;
-  const { flight, seat } = req.body;
 
   const client = new MongoClient(MONGO_URI, options);
   console.log("Connecting to MongoDB...");
   await client.connect();
   const db = client.db("slingair");
 
-  const query = { _id: ObjectId(reservationId) };
+  const query = { _id: reservationId };
 
-  const selectedResult = await db.collection("reservations").findOne(query);
 
-  if (selectedResult) {
-    try {
-      const result = await db
-        .collection("reservations")
-        .deleteOne({ _id: query });
-      // console.log("delete reservation result..",result);
-      const result2 = await db
-        .collection("flights")
-        .findOneAndUpdate(
-          { _id: flight, "seats.id": seat },
-          { $set: { "seats.$.isAvailable": true } }
-        );
-      res.status(200).json({
-        status: 200,
-        message: "Reservation deleted!",
-        reservation: result, // i use this for reference
-      });
 
-      client.close();
-    } catch (err) {
-      res.status(500).json({ status: 500, message: err.message });
-    }
-  } else {
-    res.status(404).json({ status: 404, message: "Reservation not found" });
-    return;
+  try {
+
+    const findSeating = await db.collection("reservations").findOne(query);
+
+    const updateFlightSeating = await db.collection("flights").updateOne(
+      { _id: findSeating.flight, "seats.id": findSeating.seat },
+      { $set: { "seats.$.isAvailable": true } });
+
+    const deleteReservedOne = await db.collection("reservations").deleteOne(query);
+
+    res.status(200).json({
+      status: 200,
+      message: "Reservation deleted successfully!",
+      reservation: deleteReservedOne,
+      flight: updateFlightSeating,
+    });
+
+    client.close();
+  } catch (err) {
+    res.status(500).json({ status: 500, message: err.message });
   }
 };
 
